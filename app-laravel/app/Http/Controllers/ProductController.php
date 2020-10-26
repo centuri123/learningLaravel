@@ -5,62 +5,96 @@ namespace App\Http\Controllers;
 use App\Models\ProductModel;
 use Illuminate\Http\Request;
 
-use function PHPSTORM_META\type;
-
 class ProductController extends Controller
 {
     private $productModel;
+    protected $request;
 
-    public function __construct()
+    public function __construct(ProductModel $productModel, Request $request)
     {
-        $this->productModel = new ProductModel;
+        $this->productModel = $productModel;
+        $this->request = $request;
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-        return $this->productModel->getAll();
+        $products = $this->productModel->getAll();
+        return view('admin.pages.products.index', compact('products'));
     }
 
-    public function showOne($productId)
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
     {
-        $product = $this->productModel->getOne($productId);
-        if($product->isEmpty())
-        {
-            return 'Produto não encontrado!';
-        }
-        return $product;
+        return view('admin.pages.products.create');
     }
 
-    public function insert($name, $quantity, $value)
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function store()
     {
-        $product = [
-            'name'     => $name,
-            'quantity' => $quantity,
-            'value'    => $value
-        ];
-        $this->productModel->insert($product);
-        return 'Produto inserido com sucesso!';
+        //dd($request->all());
+        //dd($request->only(['name','quantity']));
+        $this->productModel->insert($this->request->except('_token'));
+        return redirect()->route('products.index');
     }
 
-    public function delete($productId)
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
     {
-        $this->productModel->deleteProduct($productId);
-        return 'O registro escolhido foi deletado com sucesso!';
+        $product = $this->productModel->getOne($id);
+        return view('admin.pages.products.show', compact('product', 'id'));
     }
 
-    public function alter($productId, $name, $quantity, $value)
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
     {
-        $oldProduct = $this->productModel->getOne($productId);
-        $altProduct = [
-            'name'     => $name,
-            'quantity' => $quantity,
-            'value'    => $value 
-        ];
-        $this->productModel->alter($productId, $altProduct);
-        $altProduct = $this->productModel->getOne($productId);
+        $product = $this->productModel->getOne($id);
+        return view('admin.pages.products.edit', compact('product', 'id'));
+    }
 
-        $returnText = "Antes - Nome:{$oldProduct[0]->name} Quantidade: {$oldProduct[0]->quantity} Valor: {$oldProduct[0]->value}<br>
-                       Depois - Nome:{$altProduct[0]->name} Quantidade: {$altProduct[0]->quantity} Valor: {$altProduct[0]->value}";
-        return $returnText;
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update($id)
+    {
+        $this->productModel->alter($id, $this->request->except(['_token','_method']));
+        return redirect()->route('products.index');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $this->productModel->deleteProduct($id);
+        return redirect()->route('products.index');
     }
 }

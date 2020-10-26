@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::resource('products', 'ProductController');//->middleware('auth');
+/** 
+    Remoção do código abaixo para utilizar o resource do Laravel
+ */
+
+/* 
 Route::group([
     'prefix' => 'products',
 ], function(){

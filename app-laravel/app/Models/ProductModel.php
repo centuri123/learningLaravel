@@ -13,7 +13,7 @@ class ProductModel extends Model
     public function getAll()
     {
         $products = DB::table('products')
-                        ->select(['name', 'quantity', 'value'])
+                        ->select(['productId', 'name', 'quantity', 'value'])
                         ->get();
         return $products;
     }
