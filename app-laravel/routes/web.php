@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::resource('products', 'ProductController');//->middleware('auth');
+Route::get('products/all/delete', 'ProductController@deleteAll')->name('products.deleteAll');
 /** 
     Remoção do código abaixo para utilizar o resource do Laravel
  */

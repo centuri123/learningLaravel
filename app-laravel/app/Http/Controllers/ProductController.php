@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductModel;
+use App\Http\Requests\StoreUpdateProductRequest;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -10,7 +11,7 @@ class ProductController extends Controller
     private $productModel;
     protected $request;
 
-    public function __construct(ProductModel $productModel, Request $request)
+    public function __construct(Product $productModel, Request $request)
     {
         $this->productModel = $productModel;
         $this->request = $request;
@@ -23,8 +24,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = $this->productModel->getAll();
-        return view('admin.pages.products.index', compact('products'));
+        $products = $this->productModel->paginate();
+        return view('admin.pages.products.index', ['products' => $products]);
     }
 
     /**
@@ -39,14 +40,14 @@ class ProductController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
+     * @param  \App\Http\Requests\StoreUpdateProductRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function store()
+    public function store(StoreUpdateProductRequest $request)
     {
         //dd($request->all());
         //dd($request->only(['name','quantity']));
-        $this->productModel->insert($this->request->except('_token'));
+        $this->productModel->create($request->all());
         return redirect()->route('products.index');
     }
 
@@ -58,8 +59,11 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = $this->productModel->getOne($id);
-        return view('admin.pages.products.show', compact('product', 'id'));
+        if($product = $this->productModel->find($id))
+        {
+            return view('admin.pages.products.show', ['product' => $product, 'id' => $id]);
+        }
+        return redirect()->back();
     }
 
     /**
@@ -70,19 +74,34 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $product = $this->productModel->getOne($id);
-        return view('admin.pages.products.edit', compact('product', 'id'));
+        if($product = $this->productModel->find($id))
+        {
+            return view('admin.pages.products.edit', ['product' => $product, 'id' => $id]);
+        }
+        return redirect()->back();
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  int  $id
+     * @param  \App\Http\Requests\StoreUpdateProductRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function update($id, StoreUpdateProductRequest $request)
     {
-        $this->productModel->alter($id, $this->request->except(['_token','_method']));
+        /**
+         * 
+           Utilizado para aprender sobre salvar arquivos no projeto via inputs de cadastros
+         */
+        //if($this->request->image->isValid()){
+            //dd($this->request->image->store('products/teste'));
+            //dd($this->request->image->storeAs('products',"{$id}.{$this->request->image->extension()}"));
+        //}
+        if(!$product = $this->productModel->find($id)){
+            return redirect()->back();
+        }
+        $product->update($request->all());
         return redirect()->route('products.index');
     }
 
@@ -94,7 +113,20 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $this->productModel->deleteProduct($id);
+        if(!$product = $this->productModel->find($id)){
+            return redirect()->back();
+        }
+        $product->delete();
+        return redirect()->route('products.index');
+    }
+
+    /**
+     * Remove all resources from storage.
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function deleteAll(){
+        $this->productModel->deleteAllProducts();
         return redirect()->route('products.index');
     }
 }
