@@ -2,8 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::resource('products', 'ProductController');//->middleware('auth');
+Route::resource('products', 'ProductController')
+->except('show');//->middleware('auth');
+Route::get('products/show/{product}', 'ProductController@show')->name('products.show');
 Route::get('products/all/delete', 'ProductController@deleteAll')->name('products.deleteAll');
+Route::any('products/search', 'ProductController@search')->name('products.search');
+
 /** 
     Remoção do código abaixo para utilizar o resource do Laravel
  */

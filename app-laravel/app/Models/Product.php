@@ -24,6 +24,14 @@ class Product extends Model
         DB::table('products')->delete();
     }
 
+    public function searchProduct($filter = ''){
+        $results = $this->where(function($query) use($filter){
+            if($filter){
+                $query->where('name', 'LIKE', "%{$filter}%");
+            }
+        })->paginate();
+        return $results;
+    }
     /**
      * 
         Criei quando ainda não conhecia as funções herdadas da Model

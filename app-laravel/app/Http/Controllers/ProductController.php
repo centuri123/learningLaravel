@@ -129,4 +129,10 @@ class ProductController extends Controller
         $this->productModel->deleteAllProducts();
         return redirect()->route('products.index');
     }
+
+    public function search(){
+        $filters = $this->request->only('filter');
+        $products = $this->productModel->searchProduct($this->request->filter);
+        return view('admin.pages.products.index', ['products' => $products, 'filters' => $filters]);
+    }
 }

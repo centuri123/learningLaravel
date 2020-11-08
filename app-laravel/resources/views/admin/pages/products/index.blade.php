@@ -8,7 +8,12 @@
         <a href="{{route('products.deleteAll')}}" class="btn btn-danger">Apagar geral</a>
     </center>
     <hr>
-    <h1>Lista de produtos:</h1>    
+    <h1>Lista de produtos:</h1>
+    <form action="{{route('products.search')}}" method="post" class="form-inline">
+        @csrf
+        <input type="text" name="filter" class="form-control" placeholder="filtrar" value="{{$filters['filter'] ?? ''}}">
+        <button type="submit" class="btn btn-warning">Pesquisar</button>
+    </form>
     <div class="table-responsive">
         <table class="table table-striped">
             <thead>
@@ -35,14 +40,24 @@
                             @empty
                                 <table align="center">
                                     <tr>
-                                        <td><h2>Não existem Produtos cadastrados!</h2></td>
+                                        @if (isset($filters))
+                                            <td><h2>Não foram encontrados resultados na pesquisa!</h2></td>
+                                        @else
+                                            <td><h2>Não existem Produtos cadastrados!</h2></td>
+                                        @endif
                                     </tr>
                                 </table>
                         @endforelse
             </tbody>
         </table>
     </div>
-        {{-- {{!! $products->links() !!}} --}}
+    <div class="d-flex justify-content-center">
+        @if (isset($filters))
+            {!! $products->appends($filters)->links() !!}
+        @else
+            {!! $products->links() !!}
+        @endif
+    </div>
 @endsection
 
 @push('styles')
